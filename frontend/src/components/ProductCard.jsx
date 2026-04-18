@@ -1,3 +1,11 @@
+/**
+ * A reusable card component to display an individual product's details and actions.
+ * @param {Object} props
+ * @param {Object} props.product - The product object to render.
+ * @param {Function} props.onEdit - Callback fired when the Edit button is clicked.
+ * @param {Function} props.onDelete - Callback fired when the Delete button is clicked.
+ * @returns {JSX.Element} The rendered card element.
+ */
 export default function ProductCard({ product, onEdit, onDelete }) {
   return (
     <div className="product-card glass-panel">

@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * A modal component displaying a form to add or edit a product.
+ * @param {Object} props
+ * @param {Object} [props.product] - The product to edit, or null/undefined if creating a new product.
+ * @param {Function} props.onSave - Callback triggered on form submission. Expects to return validation errors if any. 
+ * @param {Function} props.onClose - Callback triggered to close the modal.
+ * @returns {JSX.Element} The rendered ProductForm component.
+ */
 export default function ProductForm({ product, onSave, onClose }) {
   const [formData, setFormData] = useState({
     productId: '',
     productName: '',
     productPrice: ''
   });
+  
+  // State to hold and display backend validation error messages gracefully
+  const [errors, setErrors] = useState({});
 
   const isEdit = !!product;
 
@@ -19,21 +30,40 @@ export default function ProductForm({ product, onSave, onClose }) {
     }
   }, [product]);
 
+  /**
+   * Updates state based on input change.
+   * Also clears individual validation error once a user starts typing.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Clear the error for this field dynamically as they type
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  /**
+   * Submits the product data and handles backend validation signals.
+   */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave({
+    setErrors({}); // Reset errors
+
+    const validationErrors = await onSave({
       productId: parseInt(formData.productId, 10),
       productName: formData.productName,
       productPrice: parseInt(formData.productPrice, 10)
     });
+
+    // If the onSave returned a dictionary of errors from the backend, bind them to state
+    if (validationErrors) {
+      setErrors(validationErrors);
+    }
   };
 
   return (
@@ -54,6 +84,7 @@ export default function ProductForm({ product, onSave, onClose }) {
               disabled={isEdit} 
               required
             />
+            {errors.productId && <span style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>{errors.productId}</span>}
           </div>
 
           <div className="form-group">
@@ -62,11 +93,12 @@ export default function ProductForm({ product, onSave, onClose }) {
               type="text"
               id="productName"
               name="productName"
-              className="form-control"
+              className={`form-control ${errors.productName ? 'input-error' : ''}`}
               value={formData.productName}
               onChange={handleChange}
               required
             />
+            {errors.productName && <span style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>{errors.productName}</span>}
           </div>
 
           <div className="form-group">
@@ -75,11 +107,12 @@ export default function ProductForm({ product, onSave, onClose }) {
               type="number"
               id="productPrice"
               name="productPrice"
-              className="form-control"
+              className={`form-control ${errors.productPrice ? 'input-error' : ''}`}
               value={formData.productPrice}
               onChange={handleChange}
               required
             />
+            {errors.productPrice && <span style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>{errors.productPrice}</span>}
           </div>
 
           <div className="form-actions">
