@@ -1,9 +1,11 @@
 package com.sunny.SpringDataJPADemo.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sunny.SpringDataJPADemo.model.Product;
 import com.sunny.SpringDataJPADemo.repository.ProductRepo;
@@ -15,19 +17,35 @@ import com.sunny.SpringDataJPADemo.repository.ProductRepo;
 @Service
 public class ProductService {
 
+	private Specification<Product> buildSearchSpecification(String keyword) {
+		return (root, query, criteriaBuilder) -> {
+			if (!StringUtils.hasText(keyword)) {
+				return null;
+			}
+
+			return criteriaBuilder.like(
+					criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%");
+		};
+	}
+
 	@Autowired
 	ProductRepo productRepo;
 
 	/**
-	 * Fetches all products entirely from the database.
-	 * @return List of products.
+	 * Fetches products using dynamic search filters and pagination.
+	 * 
+	 * @param keyword  The search term for product names.
+	 * @param pageable The pagination and sorting instructions.
+	 * @return A Page containing a slice of matching products.
 	 */
-	public List<Product> getAllProducts() {
-		return productRepo.findAll();
+	public Page<Product> getAllProducts(String keyword, Pageable pageable) {
+		Specification<Product> spec = buildSearchSpecification(keyword);
+		return productRepo.findAll(spec, pageable);
 	}
 
 	/**
 	 * Fetches a single product by its unique database ID.
+	 * 
 	 * @param productId The ID of the product.
 	 * @return The product if found, else an empty new Product instance.
 	 */
@@ -37,6 +55,7 @@ public class ProductService {
 
 	/**
 	 * Saves a new product to the database.
+	 * 
 	 * @param product The product containing unsaved changes.
 	 * @return The saved product containing its new ID.
 	 */
@@ -45,7 +64,8 @@ public class ProductService {
 	}
 
 	/**
-	 * Updates an existing product. 
+	 * Updates an existing product.
+	 * 
 	 * @param product The modified product data.
 	 * @return The updated product reflecting database changes.
 	 */
@@ -55,6 +75,7 @@ public class ProductService {
 
 	/**
 	 * Attempts to delete a product securely by its ID.
+	 * 
 	 * @param productId The ID of the product to terminate.
 	 * @return A custom success or failure message.
 	 */

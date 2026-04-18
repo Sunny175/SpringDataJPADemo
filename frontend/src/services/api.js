@@ -24,11 +24,21 @@ async function handleResponse(response) {
 }
 
 /**
- * Fetches all products from the backend.
- * @returns {Promise<Array>} A promise that resolves to an array of products.
+ * Fetches products from the backend with optional search and pagination.
+ * @param {string} keyword - Search term for product names.
+ * @param {number} page - The page number to fetch (0-indexed).
+ * @param {number} size - The number of items per page.
+ * @returns {Promise<Object>} A promise that resolves to the Page object containing products.
  */
-export async function getProducts() {
-    const response = await fetch(API_BASE_URL);
+export async function getProducts(keyword = '', page = 0, size = 10) {
+    const params = new URLSearchParams({
+        page: page,
+        size: size
+    });
+    if (keyword) {
+        params.append('keyword', keyword);
+    }
+    const response = await fetch(`${API_BASE_URL}?${params.toString()}`);
     return handleResponse(response);
 }
 

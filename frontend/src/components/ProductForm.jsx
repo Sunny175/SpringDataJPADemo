@@ -54,11 +54,17 @@ export default function ProductForm({ product, onSave, onClose }) {
     e.preventDefault();
     setErrors({}); // Reset errors
 
-    const validationErrors = await onSave({
-      productId: parseInt(formData.productId, 10),
+    const payload = {
       productName: formData.productName,
       productPrice: parseInt(formData.productPrice, 10)
-    });
+    };
+    
+    // Only pass ID if we are explicitly editing an existing item
+    if (isEdit && formData.productId) {
+      payload.productId = parseInt(formData.productId, 10);
+    }
+
+    const validationErrors = await onSave(payload);
 
     // If the onSave returned a dictionary of errors from the backend, bind them to state
     if (validationErrors) {
@@ -75,14 +81,13 @@ export default function ProductForm({ product, onSave, onClose }) {
           <div className="form-group">
             <label htmlFor="productId">Product ID</label>
             <input 
-              type="number"
+              type="text"
               id="productId"
               name="productId"
               className="form-control"
-              value={formData.productId}
-              onChange={handleChange}
-              disabled={isEdit} 
-              required
+              value={isEdit ? formData.productId : ''}
+              disabled={true} 
+              placeholder={isEdit ? '' : 'Auto-generated on Add'}
             />
             {errors.productId && <span style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>{errors.productId}</span>}
           </div>

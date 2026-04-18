@@ -3,6 +3,11 @@ package com.sunny.SpringDataJPADemo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -10,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sunny.SpringDataJPADemo.model.Product;
@@ -28,12 +34,26 @@ public class ProductController {
 	private ProductService productService;
 
 	/**
-	 * Retrieves all products.
-	 * @return A list of all stored products.
+	 * Retrieves products with optional search, pagination, and sorting.
+	 * 
+	 * @param keyword The term to search for (optional).
+	 * @param page    The page number to fetch (starts at 0).
+	 * @param size    The number of items per page.
+	 * @param sortBy  The field to sort the results by.
+	 * @return A Page of products.
 	 */
 	@GetMapping(value = "/products", produces = "application/json")
-	public List<Product> getProducts() {
-		return productService.getAllProducts();
+	public Page<Product> getProducts(
+			@RequestParam(required = false) String keyword,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "productId") String sortBy
+
+	) {
+		// Constructs the Pageable request telling the database exactly what slice of
+		// data we want
+		Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+		return productService.getAllProducts(keyword, pageable);
 	}
 
 	@GetMapping(value = "/products/{productId}", produces = "application/json")
@@ -43,6 +63,7 @@ public class ProductController {
 
 	/**
 	 * Adds a new product to the database after validating fields.
+	 * 
 	 * @param product The product object passed in the request body.
 	 * @return The saved product.
 	 */
