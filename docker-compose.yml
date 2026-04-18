@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: product_db
+      MYSQL_ROOT_PASSWORD: root
+    # Note: We purposely omitted mapping 'ports: ["3306:3306"]' because you mentioned you are 
+    # already running a manual MySQL docker container locally. Omitting it prevents port collisions, 
+    # because the 'backend' container can still natively reach this 'db' safely strictly over Docker's internal network!
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build:
+      context: .
+    restart: always
+    environment:
+      # Inject overriding properties. Note that proxy host 'db' maps perfectly to the database service above organically
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      # Temporarily creating database on first spin-up then updating automatically via jpa configuration
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: always
+    ports:
+      # Binds your browser localhost:3000 to the container's Nginx port 80
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
