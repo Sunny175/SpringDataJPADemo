@@ -40,7 +40,10 @@ function App() {
       const data = await api.getProducts(searchQuery, page);
       // Spring Data JPA wraps the list inside of "content"
       setProducts(data.content || []);
-      setTotalPages(data.totalPages || 0);
+      
+      // We support both the old raw PageImpl format and the new stable PagedModel via data.page
+      setTotalPages(data.page?.totalPages || data.totalPages || 0);
+      
       setError(null);
     } catch (err) {
       console.error(err);

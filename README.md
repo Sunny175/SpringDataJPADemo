@@ -65,14 +65,14 @@ The frontend is housed entirely within the `frontend` directory.
 
 ## 🛠️ Available Features and APIs
 
-### Backend API Endpoints (`/api/products`)
-- `GET /` - Retrieve all products
-- `GET /{id}` - Retrieve single product
-- `POST /` - Add a new product
-- `PATCH /{id}` - Update a product
-- `DELETE /{id}` - Remove a product
+### Backend
+- **CRUD Operations**: Secure endpoints mapped to `/api/products` (GET, POST, PATCH, DELETE).
+- **Caching**: Integrated Spring `@Cacheable` with in-memory caching to drastically optimize read query response times.
+- **Stable Pagination**: Configured `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)` for backwards-compatible, future-proof JSON API responses.
+- **Bulk Data Seeding**: Includes a `seed_data.py` Python script leveraging `requests` pools to quickly populate the database with tens of thousands of mock products for load testing.
 
-### Frontend Features
-- A globally responsive grid layout utilizing modern "glassmorphism" aesthetic.
+### Frontend
+- **UI Pagination**: Built-in "Next/Previous" paging controls fetching precisely sized data chunks from the backend.
+- A globally responsive grid layout utilizing a modern "glassmorphism" aesthetic.
 - Form validations with dynamic modal states for adding and updating products.
 - Error handling that gracefully displays UI warnings if the server disconnects.
