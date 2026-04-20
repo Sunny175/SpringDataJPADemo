@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +40,7 @@ public class ProductService {
 	 * @param pageable The pagination and sorting instructions.
 	 * @return A Page containing a slice of matching products.
 	 */
+	@Cacheable(value = "products")
 	public Page<Product> getAllProducts(String keyword, Pageable pageable) {
 		Specification<Product> spec = buildSearchSpecification(keyword);
 		return productRepo.findAll(spec, pageable);
@@ -49,6 +52,7 @@ public class ProductService {
 	 * @param productId The ID of the product.
 	 * @return The product if found, else an empty new Product instance.
 	 */
+	@Cacheable(value = "product", key = "#productId")
 	public Product getProductById(int productId) {
 		return productRepo.findById(productId).orElse(new Product());
 	}
@@ -59,6 +63,7 @@ public class ProductService {
 	 * @param product The product containing unsaved changes.
 	 * @return The saved product containing its new ID.
 	 */
+	@CacheEvict(value = {"products", "product"}, allEntries = true)
 	public Product addProduct(Product product) {
 		return productRepo.save(product);
 	}
@@ -69,6 +74,7 @@ public class ProductService {
 	 * @param product The modified product data.
 	 * @return The updated product reflecting database changes.
 	 */
+	@CacheEvict(value = {"products", "product"}, allEntries = true)
 	public Product updateProduct(Product product) {
 		return productRepo.save(product);
 	}
@@ -79,6 +85,7 @@ public class ProductService {
 	 * @param productId The ID of the product to terminate.
 	 * @return A custom success or failure message.
 	 */
+	@CacheEvict(value = {"products", "product"}, allEntries = true)
 	public String deleteProduct(int productId) {
 		try {
 			productRepo.deleteById(productId);

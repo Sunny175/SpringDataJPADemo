@@ -19,7 +19,7 @@ services:
     restart: always
     environment:
       # Inject overriding properties. Note that proxy host 'db' maps perfectly to the database service above organically
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       # Temporarily creating database on first spin-up then updating automatically via jpa configuration
